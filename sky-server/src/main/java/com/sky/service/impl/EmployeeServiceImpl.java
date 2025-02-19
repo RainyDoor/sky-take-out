@@ -16,6 +16,7 @@ import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
+import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
     private EmployeeMapper employeeMapper;
 
+    /**
+     * 新增员工
+     * @param employeeDTO
+     */
+    @Override
     public void save(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
 
@@ -60,6 +66,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeeLoginDTO
      * @return
      */
+    @Override
     public Employee login(EmployeeLoginDTO employeeLoginDTO) {
         String username = employeeLoginDTO.getUsername();
         String password = employeeLoginDTO.getPassword();
@@ -97,6 +104,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeePageQueryDTO
      * @return
      */
+    @Override
     public PageResult list(EmployeePageQueryDTO employeePageQueryDTO) {
         LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(employeePageQueryDTO.getName() != null, Employee::getName, employeePageQueryDTO.getName());
@@ -108,6 +116,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         pageResult.setTotal(pages.getTotal());
         pageResult.setRecords(pages.getRecords());
         return pageResult;
+    }
+
+    /**
+     * 启用、禁用员工账号
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        Employee employee = Employee.builder()
+                .id(id)
+                .status(status)
+                .build();
+        employeeMapper.updateById(employee);
     }
 
 }
