@@ -17,6 +17,12 @@ public class CommonController {
     @Autowired
     private AliOssUtil aliOssUtil;
 
+    /**
+     * 文件上传
+     * @param file
+     * @return
+     * @throws IOException
+     */
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) throws IOException {
         String url = aliOssUtil.upload(file);
