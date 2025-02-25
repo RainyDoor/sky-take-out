@@ -1,4 +1,4 @@
-package com.sky.service.impl;
+package com.sky.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

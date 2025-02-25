@@ -1,4 +1,4 @@
-package com.sky.service.impl;
+package com.sky.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -72,9 +73,18 @@ public class DishServiceImpl implements DishService {
         return dishVO;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public List<Dish> list(Long categoryId) {
-        return dishMapper.selectList(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, categoryId));
+    public List<DishVO> list(Long categoryId) {
+        List<Dish> dishes = dishMapper.selectList(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, categoryId));
+        List<DishVO> dishVOList = new ArrayList<>();
+        for (Dish dish : dishes) {
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(dish, dishVO);
+            dishVO.setFlavors(dishFlavorMapper.selectList(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dish.getId())));
+            dishVOList.add(dishVO);
+        }
+        return dishVOList;
     }
 
     @Transactional(rollbackFor = Exception.class)

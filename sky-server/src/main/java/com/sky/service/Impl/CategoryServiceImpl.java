@@ -1,4 +1,4 @@
-package com.sky.service.impl;
+package com.sky.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> list(Integer type) {
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Category::getType, type);
+        wrapper.eq(type != null, Category::getType, type);
         return categoryMapper.selectList(wrapper);
     }
 

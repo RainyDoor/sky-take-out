@@ -8,16 +8,21 @@ import com.sky.result.Result;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
-@RestController
+@RestController("adminDishController")
 @RequestMapping("/admin/dish")
 public class DishController {
 
     @Autowired
     private DishService dishService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 添加菜品
@@ -27,6 +32,11 @@ public class DishController {
     @PostMapping
     public Result add(@RequestBody DishDTO dishDTO) {
         dishService.add(dishDTO);
+
+        //清理缓存数据
+        String key = "dish_" + dishDTO.getCategoryId();
+        cleanCache(key);
+
         return Result.success();
     }
 
@@ -50,6 +60,10 @@ public class DishController {
     @PostMapping("/status/{status}")
     public Result startOrStop(@PathVariable Integer status, Long id) {
         dishService.startOrStop(status, id);
+
+        //将所有的菜品缓存数据清理掉，所有以dish_开头的key
+        cleanCache("dish_*");
+
         return Result.success();
     }
 
@@ -70,8 +84,8 @@ public class DishController {
      * @return
      */
     @GetMapping("/list")
-    public Result<List<Dish>> list(Long categoryId) {
-        List<Dish> list = dishService.list(categoryId);
+    public Result<List<DishVO>> list(Long categoryId) {
+        List<DishVO> list = dishService.list(categoryId);
         return Result.success(list);
     }
 
@@ -83,6 +97,10 @@ public class DishController {
     @PutMapping
     public Result update(@RequestBody DishDTO dishDTO) {
         dishService.update(dishDTO);
+
+        //将所有的菜品缓存数据清理掉，所有以dish_开头的key
+        cleanCache("dish_*");
+
         return Result.success();
     }
 
@@ -94,7 +112,16 @@ public class DishController {
     @DeleteMapping
     public Result delete(Long[] ids) {
         dishService.delete(ids);
+
+        //将所有的菜品缓存数据清理掉，所有以dish_开头的key
+        cleanCache("dish_*");
+
         return Result.success();
+    }
+
+    private void cleanCache(String pattern) {
+        Set keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
     }
 
 }
