@@ -14,7 +14,7 @@ import java.util.List;
 @Mapper
 public interface SetmealMapper extends BaseMapper<Setmeal> {
 
-    Page<SetmealVO> page(SetmealPageQueryDTO queryDTO);
+    Page<SetmealVO> page(SetmealPageQueryDTO dto);
 
     List<DishItemVO> getDishItemById(Long setmealId);
 

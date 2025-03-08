@@ -8,6 +8,8 @@ import com.sky.result.Result;
 import com.sky.service.SetmealService;
 import com.sky.vo.SetmealVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("adminSetmealController")
@@ -34,6 +36,7 @@ public class SetmealController {
      * @return
      */
     @PostMapping
+    @CacheEvict(cacheNames = "setmealCache", key = "#setmealDTO.categoryId")
     public Result add(@RequestBody SetmealDTO setmealDTO) {
         setMealService.add(setmealDTO);
         return Result.success();
@@ -56,6 +59,7 @@ public class SetmealController {
      * @return
      */
     @PostMapping("/status/{status}")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result startOrStop(Long id, @PathVariable Integer status) {
         setMealService.startOrStop(id, status);
         return Result.success();
@@ -67,6 +71,7 @@ public class SetmealController {
      * @return
      */
     @PutMapping
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result update(@RequestBody SetmealDTO setmealDTO) {
         setMealService.update(setmealDTO);
         return Result.success();
@@ -78,6 +83,7 @@ public class SetmealController {
      * @return
      */
     @DeleteMapping
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result delete(Long[] ids) {
         setMealService.delete(ids);
         return Result.success();

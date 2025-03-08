@@ -98,7 +98,9 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     @Override
-    public List<SetmealVO> list(SetmealPageQueryDTO queryDTO) {
+    public List<SetmealVO> list(Setmeal setmeal) {
+        SetmealPageQueryDTO queryDTO = new SetmealPageQueryDTO();
+        BeanUtils.copyProperties(setmeal, queryDTO);
         return setmealMapper.page(queryDTO);
     }
 

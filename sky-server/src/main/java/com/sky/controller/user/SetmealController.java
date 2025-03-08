@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
@@ -9,7 +10,9 @@ import com.sky.result.Result;
 import com.sky.service.SetmealService;
 import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,13 +25,20 @@ public class SetmealController {
     private SetmealService setMealService;
 
     /**
-     * 分页查询
-     * @param queryDTO
+     * 根据分类id查询套餐
+     * @param categoryId
      * @return
      */
+    @Cacheable(cacheNames = "setmealCache", key = "#categoryId")
     @GetMapping("/list")
-    public Result<List<SetmealVO>> list(SetmealPageQueryDTO queryDTO) {
-        return Result.success(setMealService.list(queryDTO));
+    @ApiOperation("根据分类id查询套餐")
+    public Result<List<SetmealVO>> list(Long categoryId) {
+
+        Setmeal setmeal = new Setmeal();
+        setmeal.setCategoryId(categoryId);
+        setmeal.setStatus(StatusConstant.ENABLE);
+
+        return Result.success(setMealService.list(setmeal));
     }
 
 
