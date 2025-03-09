@@ -76,4 +76,44 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     }
 
+    @Override
+    public List<ShoppingCart> list() {
+        Long userId = BaseContext.getCurrentId();
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUserId(userId);
+        LambdaQueryWrapper<ShoppingCart> wrapper = new LambdaQueryWrapper<ShoppingCart>()
+                .eq(ShoppingCart::getUserId, userId);
+        return shoppingCartMapper.selectList(wrapper);
+    }
+
+    @Override
+    public void clean() {
+        Long userId = BaseContext.getCurrentId();
+        shoppingCartMapper.delete(new LambdaQueryWrapper<ShoppingCart>().eq(ShoppingCart::getUserId, userId));
+    }
+
+    @Override
+    public void sub(ShoppingCartDTO shoppingCartDTO) {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
+        Long userId = BaseContext.getCurrentId();
+        shoppingCart.setUserId(userId);
+
+        LambdaQueryWrapper<ShoppingCart> wrapper = new LambdaQueryWrapper<ShoppingCart>()
+                .eq(ShoppingCart::getUserId, shoppingCart.getUserId())
+                .eq(shoppingCart.getSetmealId() != null, ShoppingCart::getSetmealId, shoppingCart.getSetmealId())
+                .eq(shoppingCart.getDishId() != null, ShoppingCart::getDishId, shoppingCart.getDishId())
+                .eq(shoppingCart.getDishFlavor() != null, ShoppingCart::getDishFlavor, shoppingCart.getDishFlavor());
+
+        List<ShoppingCart> list = shoppingCartMapper.selectList(wrapper);
+        ShoppingCart cart = list.get(0);
+        cart.setNumber(cart.getNumber() - 1);
+        if (cart.getNumber() <= 0) {
+            shoppingCartMapper.delete(wrapper);
+        } else {
+            shoppingCartMapper.updateById(cart);
+        }
+
+    }
+
 }
