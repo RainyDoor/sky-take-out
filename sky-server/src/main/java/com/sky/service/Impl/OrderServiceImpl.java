@@ -23,6 +23,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Value("${sky.baidu.ak}")
     private String ak;
+
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     /**
      * 用户下单
@@ -137,8 +141,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
-        Long userId = BaseContext.getCurrentId();
-        User user = userMapper.selectById(userId);
+//        Long userId = BaseContext.getCurrentId();
+//        User user = userMapper.selectById(userId);
 
 //        //调用微信支付接口，生成预支付交易单
 //        JSONObject jsonObject = weChatPayUtil.pay(
@@ -159,14 +163,24 @@ public class OrderServiceImpl implements OrderService {
         vo.setPackageStr(jsonObject.getString("package"));
 
         Orders orders = Orders.builder()
-                .payStatus(Orders.PAID)
+                .payStatus(Orders.PAID) //模拟微信支付成功
                 .status(Orders.TO_BE_CONFIRMED)
                 .checkoutTime(LocalDateTime.now())
                 .number(ordersPaymentDTO.getOrderNumber())
                 .build();
 
+
         orderMapper.update(orders, new LambdaQueryWrapper<Orders>()
                 .eq(Orders::getNumber, orders.getNumber()));
+
+        //通过websocket向客户端浏览器推送消息 type orderId content
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 1);
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号" + orders.getNumber());
+
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
 
         return vo;
     }
@@ -184,6 +198,16 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.updateById(orders);
+
+        //通过websocket向客户端浏览器推送消息 type orderId content
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 1);
+        map.put("orderId", orders.getId());
+        map.put("content", "订单号" + outTradeNo);
+
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
+
     }
 
     @Override
@@ -212,7 +236,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void reminder(Long id) {
-        //TODO 实现催单功能
+        Orders orders = orderMapper.selectById(id);
+
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 2);
+        map.put("orderId", id);
+        map.put("content", "订单号" + orders.getNumber());
+        String json = JSON.toJSONString(map);
+
+        webSocketServer.sendToAllClient(json);
     }
 
     @Transactional(rollbackFor = Exception.class)
