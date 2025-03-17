@@ -383,7 +383,7 @@ public class OrderServiceImpl implements OrderService {
         String shopCoordinate = HttpClientUtil.doGet("https://api.map.baidu.com/geocoding/v3", map);
 
         JSONObject jsonObject = JSON.parseObject(shopCoordinate);
-        log.info("jsonObject: {}", jsonObject);
+//        log.info("jsonObject: {}", jsonObject);
         if(!jsonObject.getString("status").equals("0")){
             throw new OrderBusinessException("店铺地址解析失败");
         }
