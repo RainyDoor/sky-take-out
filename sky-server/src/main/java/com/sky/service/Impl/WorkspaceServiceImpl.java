@@ -93,7 +93,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         int completedOrders = orderMapper.selectCount(new LambdaQueryWrapper<Orders>()
                 .eq(Orders::getStatus, Orders.COMPLETED));
         int deliveredOrders = orderMapper.selectCount(new LambdaQueryWrapper<Orders>()
-                .eq(Orders::getStatus, Orders.DELIVERY_IN_PROGRESS));
+                .eq(Orders::getStatus, Orders.CONFIRMED));
         int waitingOrders = orderMapper.selectCount(new LambdaQueryWrapper<Orders>()
                 .eq(Orders::getStatus, Orders.TO_BE_CONFIRMED));
 
