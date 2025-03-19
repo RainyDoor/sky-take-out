@@ -4,9 +4,7 @@ import com.sky.dto.*;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
-import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
-import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +25,12 @@ public class OrderController {
 
     /**
      * 取消订单
-     * @param id
+     * @param ordersCancelDTO
      * @return
      */
-    @PutMapping("/cancel/{id}")
-    public Result cancel(@PathVariable Long id) {
-        orderService.cancel(id);
+    @PutMapping("/cancel")
+    public Result cancel(OrdersCancelDTO ordersCancelDTO) {
+        orderService.cancel(ordersCancelDTO);
         return Result.success();
     }
 

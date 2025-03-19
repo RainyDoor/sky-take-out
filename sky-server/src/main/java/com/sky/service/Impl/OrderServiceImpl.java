@@ -265,26 +265,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void cancel(Long id) {
-        Orders orders = orderMapper.selectById(id);
-
-        //支付状态
-//        Integer payStatus = orders.getPayStatus();
-//        if (payStatus == 1) {
-//            //用户已支付，需要退款
-//            String refund = weChatPayUtil.refund(
-//                    orders.getNumber(),
-//                    orders.getNumber(),
-//                    new BigDecimal(0.01),
-//                    new BigDecimal(0.01));
-//            log.info("申请退款：{}", refund);
-//        }
-
-        orders.setStatus(Orders.CANCELLED);
-        orderMapper.updateById(orders);
-    }
-
-    @Override
     public OrderVO orderDetail(Long id) {
         Orders orders = orderMapper.selectById(id);
         OrderVO orderVO = new OrderVO();
@@ -394,6 +374,28 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return new PageResult(iPage.getTotal(), list);
+    }
+
+    @Override
+    public void cancel(OrdersCancelDTO ordersCancelDTO) {
+        Orders orders = orderMapper.selectById(ordersCancelDTO.getId());
+
+        //支付状态
+//        Integer payStatus = orders.getPayStatus();
+//        if (payStatus == 1) {
+//            //用户已支付，需要退款
+//            String refund = weChatPayUtil.refund(
+//                    orders.getNumber(),
+//                    orders.getNumber(),
+//                    new BigDecimal(0.01),
+//                    new BigDecimal(0.01));
+//            log.info("申请退款：{}", refund);
+//        }
+
+        orders.setCancelTime(LocalDateTime.now());
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelReason(ordersCancelDTO.getCancelReason());
+        orderMapper.updateById(orders);
     }
 
     private String getOrderDishesStr(Long orderId) {
